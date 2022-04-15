@@ -12,6 +12,11 @@ AScanPort 高速、多线程、全端口、单IP扫描。
     	127.0.0.1 or f5.ink (default "f5.ink")
 ```
 
+支持导出格式:
+- text: f5.ink:80
+- json: {"f5.ink":"80"}
+
+
 扫描结果
 
-![image](https://user-images.githubusercontent.com/27001865/163554448-f604c8a5-17d9-4f5e-802d-552c112d4691.png)
+![image](https://user-images.githubusercontent.com/27001865/163555109-bbff021c-c371-4dc3-a493-7bf7188b5043.png)
