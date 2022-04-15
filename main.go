@@ -14,7 +14,7 @@ import (
 var (
 	Target  = flag.String("t", "f5.ink", "127.0.0.1 or f5.ink")
 	Outfile = flag.String("o", "result_"+time.Now().Format("20060102_150405")+".txt", "result.txt")
-	Format  = flag.String("d", "text", "text|json|")
+	Format  = flag.String("d", "text", "text|json")
 )
 
 func main() {

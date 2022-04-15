@@ -5,7 +5,7 @@ AScanPort 高速、多线程、全端口、单IP扫描。
 
 ```
   -d string
-    	text|json| (default "text")
+    	text|json (default "text")
   -o string
     	result.txt (default "result_20220415_172833.txt")
   -t string
