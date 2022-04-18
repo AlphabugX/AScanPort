@@ -10,8 +10,11 @@ import (
 )
 
 var (
-	Scan_Pool_Max = make(chan bool, 14000)
-	neta          = net.Dialer{Timeout: 3 * time.Second}
+	MaxThread     = 14000
+	Timeout       = 3
+	MaxCheck      = 3
+	Scan_Pool_Max = make(chan bool, MaxThread)
+	neta          = net.Dialer{Timeout: time.Duration(Timeout) * time.Second}
 	Pool          sync.WaitGroup
 	Port_count    = 0
 )
@@ -20,16 +23,19 @@ func ScanPort(ip string, port string) {
 	defer Pool.Done()
 	Scan_Pool_Max <- true
 	//client, err := neta.Dial("tcp", ip+":"+port)
-	_, err := neta.Dial("tcp", ip+":"+port)
-	if err == nil {
-		Port_count += 1
-		data.Result <- port
-		reslut := map[string]interface{}{
-			"ip":   ip,
-			"port": port,
+	for check := 0; check < MaxCheck; check++ {
+		_, err := neta.Dial("tcp", ip+":"+port)
+		if err == nil {
+			Port_count += 1
+			data.Result <- port
+			reslut := map[string]interface{}{
+				"ip":   ip,
+				"port": port,
+			}
+			data, _ := json.Marshal(reslut)
+			log.Println(string(data))
+			break
 		}
-		data, _ := json.Marshal(reslut)
-		log.Println(string(data))
 	}
 	<-Scan_Pool_Max
 }
