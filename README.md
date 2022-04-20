@@ -34,3 +34,9 @@ Usage of AScanPort:
 VPS:腾讯云、200Mbps、上海
 
 ![image](masscan_VS_AScanPort.jpg)
+
+## 项目背景与更新主线
+
+AScanPort是对标masscan的速度，暂未增加SYN模式
+
+- 2022年4月20日 10:42:51关于增加fuzz、poc、爆破、获取特征的需求，AScanPort不再更新。后期另外成立一个项目，欢迎各路大佬多多指教。
