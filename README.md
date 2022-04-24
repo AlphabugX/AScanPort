@@ -7,16 +7,16 @@ AScanPort 高速、多线程、全端口、单IP扫描。
 Usage of AScanPort:
   -check int
         MaxCheck:Connect check the maximum number (default 1)
-  -d string
+  -format string
         Result format: text=>ip:port,json=>{"ip":"port"} (default "text")
   -h string
-        127.0.0.1 or f5.ink (default "f5.ink")
-  -o string
-        result.txt (default "result_20220418_135557.txt")
+        Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.* (default "f5.ink")
+  -out string
+        result.txt
   -t int
-        Maximum threads (default 14000)
+        Maximum threads (default 10000)
   -time int
-        timeout:3 seconds (default 3)
+        timeout:3 seconds (default 2)
 ```
 
 ### 支持导出格式:
