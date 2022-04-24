@@ -5,23 +5,25 @@ import (
 	"AlphaNet/data"
 	"AlphaNet/network"
 	"flag"
-	"fmt"
-	"log"
 	"os"
-	"strconv"
-	"time"
 )
 
 var (
-	Target   = flag.String("h", "f5.ink", "127.0.0.1 or f5.ink")
-	Thread   = flag.Int("t", 14000, "Maximum threads")
-	Timeout  = flag.Int("time", 3, "timeout:3 seconds")
+	Target   = flag.String("h", "f5.ink", "Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.*")
+	Thread   = flag.Int("t", 10000, "Maximum threads")
+	Timeout  = flag.Int("time", 2, "timeout:3 seconds")
 	Outfile  = flag.String("out", "", "result.txt")
 	Format   = flag.String("format", "text", "Result format: text=>ip:port,json=>{\"ip\":\"port\"}")
 	MaxCheck = flag.Int("check", 1, "MaxCheck:Connect check the maximum number")
+	//Port_list = flag.Int("p", 0, "Port:80|80,443|1-1024")
 )
 
 func main() {
+	//network.MaxThread = *Thread
+	//network.Timeout = *Timeout
+	//network.MaxCheck = *MaxCheck
+	//AScanPort()
+	//os.Exit(1)
 	flag.Parse()
 	if len(os.Args) <= 1 {
 		flag.Usage()
@@ -30,21 +32,12 @@ func main() {
 		network.Timeout = *Timeout
 		network.MaxCheck = *MaxCheck
 		config.Init()
-		AScan()
+		AScanPort()
 	}
 }
-func AScan() {
-	fmt.Print("AScanPort (Version:1.0.1)\n")
-	start := time.Now()
-	for i := 1; i < 65536; i++ {
-		network.Pool.Add(1)
-		go network.ScanPort(*Target, strconv.Itoa(i))
-	}
-	network.Pool.Wait()
-
-	log.Println("over", time.Since(start))
-	log.Println("Open Ports:", network.Port_count)
+func AScanPort() {
+	network.Go(*Target)
 	if *Outfile != "" {
-		data.Save(*Outfile, *Format, *Target)
+		data.Save(*Outfile, *Format)
 	}
 }

@@ -3,13 +3,14 @@ package data
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 var (
-	Result = make(chan string, 65535)
+	Result = make(chan string, 1234567)
 )
 
-func Save(filename string, format string, Target string) {
+func Save(filename string, format string) {
 	fl, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		return
@@ -20,14 +21,13 @@ func Save(filename string, format string, Target string) {
 		data_format = "{\"%s\":\"%s\"}\n"
 	case "text":
 		data_format = "%s:%s\n"
-
 	}
 	defer fl.Close()
 	for {
 		if len(Result) == 0 {
 			break
 		}
-		fl.Write([]byte(fmt.Sprintf(data_format, Target, <-Result)))
+		tmp := strings.Split(<-Result, ":")
+		fl.Write([]byte(fmt.Sprintf(data_format, tmp[0], tmp[1])))
 	}
-	//fl.Write([]byte(""))
 }
