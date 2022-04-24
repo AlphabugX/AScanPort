@@ -1,0 +1,4 @@
+jndi.fuzz.red
+fuzz.red
+www.fuzz.red
+f5.ink

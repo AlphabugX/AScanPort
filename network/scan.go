@@ -2,8 +2,6 @@ package network
 
 import (
 	"AlphaNet/data"
-	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"sync"
@@ -11,46 +9,48 @@ import (
 )
 
 var (
-	MaxThread          = 10000
-	Timeout            = 3
-	MaxCheck           = 3
-	Scan_Port_Pool_Max = make(chan bool, MaxThread)
-	neta               = net.Dialer{Timeout: time.Duration(Timeout) * time.Second}
-	Pool               sync.WaitGroup
-	Port_count         = 0
+	MaxThread       = 5000
+	MaxHostThread   = 100
+	Timeout         = 1
+	MaxCheck        = 2
+	ScanPortPoolMax = make(chan bool, MaxThread)
+	ScanHostPoolMax = make(chan bool, MaxHostThread)
+	neta            = net.Dialer{Timeout: time.Duration(Timeout) * time.Second}
+	Pool            sync.WaitGroup
+	PoolHost        sync.WaitGroup
+	Port_count      = 0
 )
 
 func ScanPort(ip string, port string) {
 	defer Pool.Done()
-	Scan_Port_Pool_Max <- true
 	//client, err := neta.Dial("tcp", ip+":"+port)
 	for check := 0; check < MaxCheck; check++ {
 		_, err := neta.Dial("tcp", ip+":"+port)
 		if err == nil {
 			Port_count += 1
 			data.Result <- ip + ":" + port
-			log.Printf("{\"%s\":\"%s\"}", ip, port)
 			break
 		}
 	}
-	<-Scan_Port_Pool_Max
+	<-ScanPortPoolMax
 }
 func HOSTScan(IP string) {
-	defer Pool.Done()
+	defer PoolHost.Done()
 	for i := 1; i < 65536; i++ {
+		ScanPortPoolMax <- true
 		Pool.Add(1)
 		go ScanPort(IP, strconv.Itoa(i))
 	}
+	<-ScanHostPoolMax
 }
 func Go(Target string) {
-	fmt.Print("AScanPort (Version:1.0.1)\n")
 	IPLIST := IPLIST(Target)
-	start := time.Now()
 	for _, ip := range IPLIST {
-		Pool.Add(1)
+		ScanHostPoolMax <- true
+		PoolHost.Add(1)
 		go HOSTScan(ip)
 	}
+	PoolHost.Wait()
 	Pool.Wait()
-	log.Println("over", time.Since(start))
-	log.Println("Open Ports:", Port_count)
+
 }
