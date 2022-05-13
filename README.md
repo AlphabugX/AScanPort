@@ -33,7 +33,7 @@ Usage of AScanPort:
 
 ### 扫描结果
 ```
-./AScanPort_linux_amd64 -h f5.ink -check 2 -s
+./AScanPort_linux_amd64 -h f5.ink -time 1 -t 10000 -check 2
 ```
 ![image](AScanPort.jpg)
 

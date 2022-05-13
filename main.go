@@ -15,6 +15,7 @@ import (
 
 var (
 	Silent     bool
+	Service    bool
 	Outfile    = flag.String("out", "", "result.txt")
 	Target     = flag.String("h", "127.0.0.1", "Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.*")
 	TargetFile = flag.String("hf", "", "Target:ip.txt")
@@ -28,10 +29,18 @@ var (
 
 func init() {
 	flag.BoolVar(&Silent, "s", false, "silent mode")
+	flag.BoolVar(&Service, "v", false, "service probes")
 }
 
 func main() {
-
+	//network.MaxThread = 10000
+	//network.Timeout = 1
+	//network.MaxCheck = 2
+	//*Target = "f5.ink"
+	////*Target = "192.168.128.141"
+	//data.Silent = Silent
+	//config.Init()
+	//AScanPort()
 	flag.Parse()
 	if len(os.Args) <= 1 {
 		flag.Usage()
@@ -39,6 +48,8 @@ func main() {
 		network.MaxThread = *Thread
 		network.Timeout = *Timeout
 		network.MaxCheck = *MaxCheck
+		network.Service = Service
+		data.Service = Service
 		data.Silent = Silent
 		config.Init()
 		AScanPort()
@@ -48,7 +59,7 @@ func AScanPort() {
 	go scan_logs()
 	var start time.Time
 	if !data.Silent {
-		fmt.Print("AScanPort (Version:1.0.4)\n")
+		fmt.Print("AScanPort (Version:1.0.5)\n")
 		start = time.Now()
 	}
 	var Target_range interface{}
