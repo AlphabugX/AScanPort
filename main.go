@@ -1,9 +1,9 @@
 package main
 
 import (
-	"AlphaNet/config"
-	"AlphaNet/data"
-	"AlphaNet/network"
+	"AScanPort/config"
+	"AScanPort/data"
+	"AScanPort/network"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -14,16 +14,21 @@ import (
 )
 
 var (
-	Target     = flag.String("h", "f5.ink", "Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.*")
+	Silent     bool
+	Outfile    = flag.String("out", "", "result.txt")
+	Target     = flag.String("h", "127.0.0.1", "Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.*")
 	TargetFile = flag.String("hf", "", "Target:ip.txt")
 	Thread     = flag.Int("t", 1000, "Maximum threads")
 	Timeout    = flag.Int("time", 2, "timeout:3 seconds")
-	Outfile    = flag.String("out", "", "result.txt")
 	Format     = flag.String("format", "text", "Result format: text=>ip:port,json=>{\"ip\":\"port\"}")
 	MaxCheck   = flag.Int("check", 1, "MaxCheck:Connect check the maximum number")
-	Silent     = flag.Bool("s", false, "silent mode")
+
 	//Port_list = flag.Int("p", 0, "Port:80|80,443|1-1024")
 )
+
+func init() {
+	flag.BoolVar(&Silent, "s", false, "silent mode")
+}
 
 func main() {
 
@@ -34,16 +39,16 @@ func main() {
 		network.MaxThread = *Thread
 		network.Timeout = *Timeout
 		network.MaxCheck = *MaxCheck
-		data.Silent = *Silent
+		data.Silent = Silent
 		config.Init()
 		AScanPort()
 	}
 }
 func AScanPort() {
-	go Log_save()
+	go scan_logs()
 	var start time.Time
 	if !data.Silent {
-		fmt.Print("AScanPort (Version:1.0.1)\n")
+		fmt.Print("AScanPort (Version:1.0.4)\n")
 		start = time.Now()
 	}
 	var Target_range interface{}
@@ -69,7 +74,7 @@ func AScanPort() {
 		log.Println("Open Ports:", network.Port_count)
 	}
 }
-func Log_save() {
+func scan_logs() {
 	if *Outfile != "" {
 		data.Save(*Outfile, *Format)
 	}

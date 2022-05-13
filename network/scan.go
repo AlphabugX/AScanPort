@@ -1,7 +1,9 @@
 package network
 
 import (
-	"AlphaNet/data"
+	"AScanPort/data"
+	"fmt"
+	"log"
 	"net"
 	"strconv"
 	"sync"
@@ -9,7 +11,7 @@ import (
 )
 
 var (
-	MaxThread       = 5000
+	MaxThread       = 10000
 	MaxHostThread   = 100
 	Timeout         = 1
 	MaxCheck        = 2
@@ -29,6 +31,11 @@ func ScanPort(ip string, port string) {
 		if err == nil {
 			Port_count += 1
 			data.Result <- ip + ":" + port
+			if !data.Silent {
+				log.Printf("{\"%s\":\"%s\"}\n", ip, port)
+			} else {
+				fmt.Println(ip + ":" + port)
+			}
 			break
 		}
 	}

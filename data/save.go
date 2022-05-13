@@ -3,7 +3,6 @@ package data
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -28,14 +27,8 @@ func Save(filename string, format string) {
 	defer file.Close()
 	write := bufio.NewWriter(file)
 	for {
-		Result_log := <-Result
-		tmp := strings.Split(Result_log, ":")
-		if Silent {
-			fmt.Println(Result_log)
-		} else {
-			log.Printf("{\"%s\":\"%s\"}", tmp[0], tmp[1])
-		}
-
+		tmp_string := <-Result
+		tmp := strings.Split(tmp_string, ":")
 		writeline := fmt.Sprintf(data_format, tmp[0], tmp[1])
 		write.WriteString(writeline)
 		write.Flush()

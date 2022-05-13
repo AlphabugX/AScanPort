@@ -1,5 +1,5 @@
 # AScanPort
-AScanPort 高速、多线程、全端口、单IP扫描。
+AScanPort 高速、多线程、全端口、单IP扫描、多IP扫描、多网段扫描。
 
 ## 食用方法
 
@@ -25,10 +25,15 @@ Usage of AScanPort:
 ### 支持导出格式:
 - text: f5.ink:80
 - json: {"f5.ink":"80"}
+### 静默模式
+```
+./AScanPort_linux_amd64 -h f5.ink -check 2 -s
+```
+![image](AScanPort_slience.jpg)
 
 ### 扫描结果
 ```
-./AScanPort_linux_amd64 -h f5.ink -time 1 -t 10000 -check 2
+./AScanPort_linux_amd64 -h f5.ink -check 2 -s
 ```
 ![image](AScanPort.jpg)
 

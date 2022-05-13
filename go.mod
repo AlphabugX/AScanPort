@@ -1,4 +1,4 @@
-module AlphaNet
+module AScanPort
 
 go 1.16
 
