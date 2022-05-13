@@ -1,5 +1,5 @@
 # AScanPort
-AScanPort 高速、多线程、全端口、单IP扫描。
+AScanPort 高速、多线程、全端口、单IP扫描、多IP扫描、多网段扫描。
 
 ## 食用方法
 
