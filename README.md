@@ -25,11 +25,17 @@ Usage of AScanPort:
 ### 支持导出格式:
 - text: f5.ink:80
 - json: {"f5.ink":"80"}
-### 静默模式
+### 静默模式 [-s]
 ```
 ./AScanPort_linux_amd64 -h f5.ink -check 2 -s
 ```
 ![image](AScanPort_slience.jpg)
+
+### 服务识别 [-v]
+```
+./AScanPort_linux_amd64 -v -h f5.ink -t 10000 -time 1 -check 2
+```
+![image](AScanPort_service.jpg)
 
 ### 扫描结果
 ```
