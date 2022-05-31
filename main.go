@@ -1,92 +1,121 @@
 package main
-
 import (
-	"AScanPort/config"
-	"AScanPort/data"
-	"AScanPort/network"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
+	"net"
 	"os"
-	"strings"
-	"time"
 )
-
 var (
-	Silent     bool
-	Service    bool
-	Outfile    = flag.String("out", "", "result.txt")
-	Target     = flag.String("h", "127.0.0.1", "Target:f5.ink|114.67.111.74|114.67.111.74/28|114.67.111.74-80|114.67.111.74-114.67.111.80|114.67.111.*")
-	TargetFile = flag.String("hf", "", "Target:ip.txt")
-	Thread     = flag.Int("t", 1000, "Maximum threads")
-	Timeout    = flag.Int("time", 2, "timeout:3 seconds")
-	Format     = flag.String("format", "text", "Result format: text=>ip:port,json=>{\"ip\":\"port\"}")
-	MaxCheck   = flag.Int("check", 1, "MaxCheck:Connect check the maximum number")
-
-	//Port_list = flag.Int("p", 0, "Port:80|80,443|1-1024")
+	online = make(chan bool,1)
+	bind = false
+	local = flag.String("l", "0.0.0.0:222", "0.0.0.0:222 [本地网卡监听端口]")
+	dst = flag.String("r", "8.8.8.8:1234", "8.8.8.8:1234 [NC、CobaltStrike、Metasploit等服务监听端口]")
+	A net.Conn
+	B net.Conn
 )
-
 func init() {
-	flag.BoolVar(&Silent, "s", false, "silent mode")
-	flag.BoolVar(&Service, "v", false, "service probes")
+	flag.BoolVar(&bind, "bind", true, "local to local [正向监听:127.0.0.1:10=>192.168.1.100:10,边界:192.168.1.100:10=>(边界)=>8.8.8.8:1234]")
+}
+func main() {
+	flag.Parse()
+	if len(os.Args)<=2 {
+		flag.Usage()
+	}else {
+		if bind {
+			go bind_listen_A()
+			bind_listen_B()
+		}else {
+			listen()
+		}
+	}
+
 }
 
-func main() {
-	//network.MaxThread = 10000
-	//network.Timeout = 1
-	//network.MaxCheck = 2
-	//*Target = "f5.ink"
-	////*Target = "192.168.128.141"
-	//data.Silent = Silent
-	//config.Init()
-	//AScanPort()
-	flag.Parse()
-	if len(os.Args) <= 1 {
-		flag.Usage()
-	} else {
-		network.MaxThread = *Thread
-		network.Timeout = *Timeout
-		network.MaxCheck = *MaxCheck
-		network.Service = Service
-		data.Service = Service
-		data.Silent = Silent
-		config.Init()
-		AScanPort()
-	}
-}
-func AScanPort() {
-	go scan_logs()
-	var start time.Time
-	if !data.Silent {
-		fmt.Print("AScanPort (Version:1.0.5)\n")
-		start = time.Now()
-	}
-	var Target_range interface{}
-	if *TargetFile != "" {
-		IPLIST, err := ioutil.ReadFile(*TargetFile)
+
+func listen()  {
+	log.Println("Start listen",*local)
+	for {
+		ln,err := net.Listen("tcp",*local)
 		if err != nil {
-			log.Fatalln("filename doesn't exist")
+			fmt.Println("tcp_listen:",err)
+			return
 		}
-		Target_range = strings.Split(strings.ReplaceAll(string(IPLIST), "\r", ""), "\n")
-	} else {
-		Target_range = *Target
-	}
-	switch Target_range.(type) {
-	case string:
-		network.Go(Target_range.(string))
-	case []string:
-		for _, item := range Target_range.([]string) {
-			network.Go(item)
+		defer ln.Close()
+		for{
+			tcp_Conn,err:=ln.Accept()
+			if err!=nil{
+				fmt.Println("Accept:",err)
+				return
+			}
+			go tcp_handle(tcp_Conn)
 		}
-	}
-	if !data.Silent {
-		log.Println("over", time.Since(start))
-		log.Println("Open Ports:", network.Port_count)
 	}
 }
-func scan_logs() {
-	if *Outfile != "" {
-		data.Save(*Outfile, *Format)
+func tcp_handle(tcpConn net.Conn){
+	remote_tcp,err:=net.Dial("tcp",*dst)
+	if err!=nil{
+		fmt.Println(err)
+		return
 	}
+	log.Println(dst,"=>",*local)
+	go io.Copy(remote_tcp,tcpConn)
+	log.Println(local,"=>",*dst)
+	go io.Copy(tcpConn,remote_tcp)
+
+}
+
+func bind_listen_A()  {
+	log.Println("Start listen",*local)
+	for {
+		ln,err := net.Listen("tcp",*local)
+		if err != nil {
+			fmt.Println("tcp_listen:",err)
+			return
+		}
+		defer ln.Close()
+		for{
+			A,err=ln.Accept()
+			if err!=nil{
+				fmt.Println("Accept:",err)
+				return
+			}
+			go func() {
+				if <-online {
+					go bind_tcp_handle(A,B)
+				}
+			}()
+		}
+	}
+}
+
+func bind_listen_B()  {
+	log.Println("Start listen",*dst)
+	for {
+		ln,err := net.Listen("tcp",*dst)
+		if err != nil {
+			fmt.Println("tcp_listen:",dst)
+			return
+		}
+		defer ln.Close()
+		for{
+			B,err=ln.Accept()
+			if err!=nil{
+				fmt.Println("Accept:",err)
+				return
+			}
+			go func() {
+				online <- true
+				go bind_tcp_handle(B,A)
+			}()
+
+		}
+	}
+}
+func bind_tcp_handle(local net.Conn,dst net.Conn){
+	log.Println(dst.LocalAddr(),"=>",local.LocalAddr())
+	io.Copy(local,dst)
+	log.Println(local.LocalAddr(),"=>",dst.LocalAddr())
+	io.Copy(dst,local)
 }
